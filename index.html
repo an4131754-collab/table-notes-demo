@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>餐桌筆記</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <header class="shell masthead">
+    <p class="eyebrow">互動示範</p>
+    <h1>餐桌筆記</h1>
+    <p>記下吃過的店，慢慢排出你的口袋名單。</p>
+    <nav aria-label="主要頁面">
+      <button type="button" data-page="search" aria-current="page">找店</button>
+      <button type="button" data-page="lists">我的清單</button>
+      <button type="button" data-page="explore">探索</button>
+      <button type="button" data-page="activity">動態</button>
+      <button type="button" data-page="profile">個人</button>
+    </nav>
+    <button type="button" class="tour-link" data-page="tour">三步導覽</button>
+  </header>
+  <main class="shell" id="main">
+    <section id="view" aria-labelledby="view-title"></section>
+  </main>
+  <p id="status" class="notice" role="status"></p>
+  <dialog id="dialog" aria-labelledby="dialog-title">
+    <form id="rating-form">
+      <header class="modal-title">
+        <h2 id="dialog-title"></h2>
+        <button type="button" data-close aria-label="關閉評價">×</button>
+      </header>
+      <section id="details-form">
+        <fieldset>
+          <legend>這次吃得怎麼樣？</legend>
+          <div class="choices">
+            <label><input type="radio" name="mood" value="liked" required> 喜歡</label>
+            <label><input type="radio" name="mood" value="fine" required> 普通</label>
+            <label><input type="radio" name="mood" value="disliked" required> 不喜歡</label>
+          </div>
+        </fieldset>
+        <details id="extras" hidden>
+          <summary>加上這餐的細節</summary>
+          <label>同行者 <input name="companions" maxlength="80"></label>
+          <label>標籤 <input name="tags" maxlength="120" placeholder="例如 早午餐、約會"></label>
+          <label>喜歡的菜 <input name="dish" maxlength="80"></label>
+          <label>用餐日期 <input name="date" type="date"></label>
+          <label>照片 <input name="photo" type="file" accept="image/*"></label>
+          <label>筆記 <textarea name="note" maxlength="280" rows="2"></textarea></label>
+          <label><input name="hiddenFromActivity" type="checkbox"> 在動態隱藏這次紀錄</label>
+        </details>
+        <button type="submit" class="primary" disabled>確認評價</button>
+      </section>
+      <section id="comparison" hidden aria-labelledby="compare-title">
+        <h3 id="compare-title" tabindex="-1">你比較喜歡哪一家？</h3>
+        <div class="pair"></div>
+        <div class="compare-actions">
+          <button type="button" data-choice="undo">上一步</button>
+          <button type="button" data-choice="tie">一樣喜歡</button>
+          <button type="button" data-choice="skip">換一家比較</button>
+        </div>
+      </section>
+      <p id="dialog-error" role="alert"></p>
+    </form>
+  </dialog>
+</body>
+</html>
