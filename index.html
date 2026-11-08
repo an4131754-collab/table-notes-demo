@@ -9,52 +9,53 @@
 </head>
 <body>
   <header class="shell masthead">
-    <p class="eyebrow">互動示範</p>
-    <h1>餐桌筆記</h1>
-    <p>記下吃過的店，慢慢排出你的口袋名單。</p>
-    <nav aria-label="主要頁面">
-      <button type="button" data-page="search" aria-current="page">找店</button>
-      <button type="button" data-page="lists">我的清單</button>
-      <button type="button" data-page="explore">探索</button>
-      <button type="button" data-page="activity">動態</button>
-      <button type="button" data-page="profile">個人</button>
-    </nav>
-    <button type="button" class="tour-link" data-page="tour">三步導覽</button>
+    <div><h1>餐桌筆記<span class="brand-dot">.</span></h1><p class="edition">你的美食口袋名單</p></div>
+    <button type="button" class="tour-link" data-page="tour" aria-label="三步導覽">使用導覽 <span aria-hidden="true">↗</span></button>
   </header>
   <main class="shell" id="main">
     <section id="view" aria-labelledby="view-title"></section>
   </main>
+    <nav aria-label="主要頁面">
+      <button type="button" data-page="activity"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM8 7h8M8 11h8M8 15h5"/></svg><span>動態</span></button>
+      <button type="button" data-page="lists"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h12M9 12h12M9 18h12M3 6h1M3 12h1M3 18h1"/></svg><span>我的清單</span></button>
+      <button type="button" data-page="search" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>找店</span></button>
+      <button type="button" data-page="explore"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9c0 5-7 11-7 11S5 14 5 9a7 7 0 0 1 14 0Z"/><circle cx="12" cy="9" r="2"/></svg><span>探索</span></button>
+      <button type="button" data-page="profile"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a8 8 0 0 1 16 0v2"/></svg><span>個人</span></button>
+    </nav>
   <p id="status" class="notice" role="status"></p>
   <dialog id="dialog" aria-labelledby="dialog-title">
     <form id="rating-form">
       <header class="modal-title">
-        <h2 id="dialog-title"></h2>
+        <div><h2 id="dialog-title"></h2><p id="dialog-meta" class="muted"></p></div>
         <button type="button" data-close aria-label="關閉評價">×</button>
       </header>
+      <p class="category-strip">加入我的清單 <span>餐廳</span></p>
       <section id="details-form">
         <fieldset>
           <legend>這次吃得怎麼樣？</legend>
           <div class="choices">
-            <label><input type="radio" name="mood" value="liked" required> 喜歡</label>
-            <label><input type="radio" name="mood" value="fine" required> 普通</label>
-            <label><input type="radio" name="mood" value="disliked" required> 不喜歡</label>
+            <label class="mood-liked"><input type="radio" name="mood" value="liked" required><span class="mood-circle" aria-hidden="true"></span> 喜歡</label>
+            <label class="mood-fine"><input type="radio" name="mood" value="fine" required><span class="mood-circle" aria-hidden="true"></span> 普通</label>
+            <label class="mood-disliked"><input type="radio" name="mood" value="disliked" required><span class="mood-circle" aria-hidden="true"></span> 不喜歡</label>
           </div>
         </fieldset>
         <details id="extras" hidden>
-          <summary>加上這餐的細節</summary>
-          <label>同行者 <input name="companions" maxlength="80"></label>
-          <label>標籤 <input name="tags" maxlength="120" placeholder="例如 早午餐、約會"></label>
-          <label>喜歡的菜 <input name="dish" maxlength="80"></label>
-          <label>用餐日期 <input name="date" type="date"></label>
-          <label>照片 <input name="photo" type="file" accept="image/*"></label>
-          <label>筆記 <textarea name="note" maxlength="280" rows="2"></textarea></label>
-          <label><input name="hiddenFromActivity" type="checkbox"> 在動態隱藏這次紀錄</label>
+          <summary>加上這餐的細節 <span>選填</span></summary>
+          <details class="entry-field"><summary>同行者<span aria-hidden="true">＋</span></summary><label>同行者 <input name="companions" maxlength="80" placeholder="這次和誰一起吃？"></label></details>
+          <details class="entry-field"><summary>加上標籤<span aria-hidden="true">＋</span></summary><label>標籤 <input name="tags" maxlength="120" placeholder="例如 早午餐、約會"></label></details>
+          <details class="entry-field"><summary>寫下筆記<span aria-hidden="true">＋</span></summary><label>筆記 <textarea name="note" maxlength="280" rows="3" placeholder="記下想再來的理由…"></textarea></label></details>
+          <details class="entry-field"><summary>喜歡的菜<span aria-hidden="true">＋</span></summary><label>喜歡的菜 <input name="dish" maxlength="80" placeholder="下次還想點什麼？"></label></details>
+          <details class="entry-field"><summary>加入照片<span aria-hidden="true">＋</span></summary><label>照片 <input name="photo" type="file" accept="image/*"></label></details>
+          <details class="entry-field"><summary>用餐日期<span aria-hidden="true">＋</span></summary><label>用餐日期 <input name="date" type="date"></label></details>
+          <label class="privacy-option"><span>隱藏這次動態<small>仍保留在你的個人清單</small></span><input name="hiddenFromActivity" type="checkbox" aria-label="在動態隱藏這次紀錄"></label>
         </details>
         <button type="submit" class="primary" disabled>確認評價</button>
       </section>
       <section id="comparison" hidden aria-labelledby="compare-title">
+        <div id="comparison-mood" class="comparison-mood"></div>
         <h3 id="compare-title" tabindex="-1">你比較喜歡哪一家？</h3>
         <div class="pair"></div>
+        <details class="comparison-info"><summary>查看餐廳資訊</summary><div id="comparison-info"></div></details>
         <div class="compare-actions">
           <button type="button" data-choice="undo">上一步</button>
           <button type="button" data-choice="tie">一樣喜歡</button>

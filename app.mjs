@@ -81,8 +81,10 @@ function rows(places) {
     const isSaved = state.saved.includes(place.id);
     const rating = score(place.id, state.ranked);
     const rank = pos === -1 ? '' : ' · 第 ' + (pos + 1) + ' 名' + (rating ? ' · ' + rating + ' 分' : '');
-    return '<li class="row"><button type="button" class="title" data-detail="' + place.id + '">'
-      + '<strong>' + escape(place.name) + '</strong><small>' + place.district + ' · ' + place.cuisine + rank + '</small></button>'
+    return '<li class="row">' + (ranked ? '<span class="rank-badge ' + ranked.mood + '" aria-hidden="true">'
+      + (rating || '#' + (pos + 1)) + '</span>' : '')
+      + '<button type="button" class="title" data-detail="' + place.id + '">'
+      + '<strong>' + escape(place.name) + '</strong><small>' + place.district + ' · ' + place.cuisine + ' · ' + '＄'.repeat(place.price) + rank + '</small></button>'
       + '<button type="button" data-rate="' + place.id + '" aria-label="' + escape((pos < 0 ? '評價 ' : '重評 ') + place.name) + '">'
       + (pos < 0 ? '＋' : '重評') + '</button>'
       + '<button type="button" class="bookmark" data-bookmark="' + place.id + '" aria-pressed="' + isSaved + '" aria-label="' + escape('想去 ' + place.name) + '">想去</button></li>';
@@ -106,18 +108,23 @@ function detail(place) {
   const image = row?.photo && typeof row.photo === 'string' && /^data:image\/jpeg;base64,[a-zA-Z0-9+/=]+$/.test(row.photo)
     ? '<img src="' + row.photo + '" alt="此餐紀錄的照片">' : '';
   const isSaved = state.saved.includes(place.id);
-  return '<button type="button" data-back>← 返回</button>'
-    + '<article class="place"><h2 id="view-title">' + place.name + '</h2>'
+  return '<button type="button" class="back-button" data-back>← 返回</button>'
+    + '<article class="place"><div class="place-hero">' + drawMap([place]) + '</div><h2 id="view-title">' + place.name + '</h2>'
     + '<p class="muted">' + place.city + ' · ' + place.district + ' · ' + place.cuisine + '</p>'
     + (row ? '<p><strong>第 ' + rank + ' 名</strong> · ' + labels[row.mood]
       + (rating ? ' · ' + rating + ' 分' : ' · 排滿 10 家顯示分數') + '</p>' : '')
-    + '<button type="button" class="primary" data-rate="' + place.id + '">' + (row ? '重新評價' : '加入吃過') + '</button> '
+    + '<div class="place-actions"><button type="button" class="primary" data-rate="' + place.id + '">' + (row ? '重新評價' : '加入吃過') + '</button> '
     + '<button type="button" class="bookmark" aria-pressed="' + isSaved + '" data-bookmark="' + place.id + '">' + (isSaved ? '已收藏' : '存為想去') + '</button>'
-    + (row?.dish ? '<p>喜歡的菜　' + escape(row.dish) + '</p>' : '')
-    + (row?.date ? '<p>用餐日期　' + escape(row.date) + '</p>' : '')
-    + (row?.companions ? '<p>同行者　' + escape(row.companions) + '</p>' : '')
-    + (row?.tags.length ? '<p>標籤　' + escape(row.tags.join('、')) + '</p>' : '')
-    + (row?.note ? '<p>' + escape(row.note) + '</p>' : '') + image
+    + '<button type="button" data-page="explore">街區地圖</button></div>'
+    + '<section class="score-grid" aria-label="我的評價摘要"><div><strong>' + (rank ? '#' + rank : '—') + '</strong>我的排名</div>'
+    + '<div><strong>' + (rating || '—') + '</strong>' + (rating ? '我的分數' : '滿 10 家顯示分數') + '</div>'
+    + '<div><strong>' + (row ? labels[row.mood] : '未評價') + '</strong>用餐感受</div></section>'
+    + (row ? '<h3>我的用餐紀錄</h3>' : '<p class="muted">吃過這家嗎？記下感受，讓下一次選餐更簡單。</p>')
+    + (row?.dish ? '<p class="record-detail"><small>喜歡的菜</small>' + escape(row.dish) + '</p>' : '')
+    + (row?.date ? '<p class="record-detail"><small>用餐日期</small>' + escape(row.date) + '</p>' : '')
+    + (row?.companions ? '<p class="record-detail"><small>同行者</small>' + escape(row.companions) + '</p>' : '')
+    + (row?.tags.length ? '<p class="record-detail"><small>標籤</small>' + escape(row.tags.join('、')) + '</p>' : '')
+    + (row?.note ? '<p class="record-detail"><small>筆記</small>' + escape(row.note) + '</p>' : '') + image
     + (row && state.ranked.length === 1 ? '<section class="first-rank"><h3>你記下第一家店了</h3>'
       + '<p>再評一家，就能開始累積自己的口味排行。</p>'
       + '<button type="button" data-next>再評一家</button></section>' : '')
@@ -132,12 +139,12 @@ function drawMap(places) {
     const y = 31 + Math.floor(i % 6 / 2) * 24 + (i % 2 ? 7 : 0);
     return '<button type="button" class="map-pin" data-detail="' + place.id
       + '" aria-label="地圖上的 ' + escape(place.name) + '" style="--x:' + x + '%;--y:' + y + '%">'
-      + place.id + '</button>';
+      + (score(place.id, state.ranked) || place.id) + '</button>';
   }).join('');
   return '<div class="map" aria-label="虛構街區示意圖">'
     + '<svg aria-hidden="true" viewBox="0 0 480 230" preserveAspectRatio="none">'
     + '<path d="M0 146Q145 185 257 128T480 154" fill="none" stroke="#c5dcdf" stroke-width="28"/>'
-    + '<path d="M143 0v230M338 0v230M0 76h480M0 198h480M86 0v115M404 92v138" fill="none" stroke="#fffdf7" stroke-width="9"/>'
+    + '<path d="M143 0v230M338 0v230M0 76h480M0 198h480M86 0v115M404 92v138" fill="none" stroke="#fff" stroke-width="9"/>'
     + '<rect x="163" y="14" width="110" height="40" rx="8" fill="#d3e0bc"/></svg>'
     + '<div class="map-labels"><span>北巷</span><span>中街</span><span>南埕</span></div>' + pins + '</div>';
 }
@@ -170,7 +177,7 @@ function exploration() {
 
 function drawTour() {
   const step = tour[tourStep];
-  return '<section class="place"><p class="eyebrow">' + (tourStep + 1) + ' / ' + tour.length + '</p>'
+  return '<section class="place tour-card"><p class="eyebrow">' + (tourStep + 1) + ' / ' + tour.length + '</p>'
     + '<h2 id="view-title">' + step.title + '</h2><p>' + step.summary + '</p>'
     + drawMap([]) + '<div class="tour-actions">'
     + '<button type="button" data-tour-step="-1"' + (tourStep === 0 ? ' disabled' : '') + '>上一張</button>'
@@ -185,13 +192,19 @@ function render() {
   }
   if (selected) view.innerHTML = detail(restaurants.get(selected));
   else if (page === 'search') {
-    view.innerHTML = '<h2 id="view-title">找店</h2><input type="search" id="search" aria-label="搜尋店名或料理" placeholder="搜尋店名或料理"><div id="results"></div>';
+    view.innerHTML = '<h2 id="view-title">找店</h2><div class="page-tabs"><span class="active">餐廳</span>'
+      + '<button type="button" data-page="lists" aria-label="前往我的清單">我的清單</button></div>'
+      + '<div class="search-wrap"><span aria-hidden="true">⌕</span><input type="search" id="search" aria-label="搜尋店名或料理" placeholder="搜尋餐廳、料理或街區"></div>'
+      + '<p class="search-location"><span aria-hidden="true">⌖</span>示範市<small>北巷 · 中街 · 南埕</small></p>'
+      + '<div class="quick-links"><button type="button" data-page="explore">探索地圖</button>'
+      + '<button type="button" data-page="explore">口味推薦</button><button type="button" data-page="lists">我的排行</button></div>'
+      + '<div id="results"></div><p class="catalog-note">這裡的店家與街區為示範資料。你的用餐紀錄儲存在此瀏覽器。</p>';
     document.querySelector('#search').value = query;
     drawResults();
   } else if (page === 'lists') {
     const been = state.ranked.map(row => restaurants.get(row.id));
     const saved = state.saved.map(id => restaurants.get(id));
-    view.innerHTML = '<h2 id="view-title">我的清單</h2><div class="switcher">'
+    view.innerHTML = '<h2 id="view-title">我的清單</h2><p class="muted">吃過 ' + been.length + ' 家 · 想去 ' + saved.length + ' 家</p><div class="switcher">'
       + '<button type="button" data-list-view="list" aria-pressed="' + !listMap + '">清單</button>'
       + '<button type="button" data-list-view="map" aria-pressed="' + listMap + '">地圖</button></div>'
       + (listMap ? drawMap([...been, ...saved.filter(place => !been.some(row => row.id === place.id))])
@@ -202,9 +215,14 @@ function render() {
     view.innerHTML = '<h2 id="view-title">動態</h2><p class="muted">最近的用餐紀錄</p>'
       + rows(recent.map(row => restaurants.get(row.id)));
   } else if (page === 'profile') {
-    view.innerHTML = '<h2 id="view-title">個人</h2><section class="place"><h3>我的用餐足跡</h3>'
-      + '<p>吃過 <strong>' + state.ranked.length + '</strong> 家 · 想去 <strong>' + state.saved.length + '</strong> 家</p>'
-      + '<button type="button" data-page="lists">查看我的清單</button></section>';
+    const cuisines = [...new Set(state.ranked.map(row => restaurants.get(row.id).cuisine))];
+    view.innerHTML = '<h2 id="view-title">個人</h2><section class="place"><div class="profile-head"><div class="avatar" aria-hidden="true">我</div>'
+      + '<h3>我的用餐足跡</h3><p class="muted">把每一餐，變成自己的口袋名單。</p></div>'
+      + '<div class="profile-stats"><div><strong>' + state.ranked.length + '</strong>吃過</div><div><strong>' + state.saved.length + '</strong>想去</div>'
+      + '<div><strong>' + cuisines.length + '</strong>料理種類</div></div>'
+      + '<h3>探索過的口味</h3>' + (cuisines.length ? '<div class="chips">' + cuisines.map(cuisine => '<span>' + escape(cuisine) + '</span>').join('') + '</div>'
+        : '<p class="muted">從第一家餐廳開始，記下你的口味。</p>')
+      + '<div class="place-actions"><button type="button" class="primary" data-page="lists">查看我的清單</button><button type="button" data-page="explore">探索下一家</button></div></section>';
   } else view.innerHTML = page === 'tour' ? drawTour() : exploration();
 }
 
@@ -223,9 +241,12 @@ function openRating(id) {
   }
   fields.hidden = false;
   comparison.hidden = true;
-  extras.open = false;
+  extras.open = Boolean(form.elements.mood.value);
+  for (const field of extras.querySelectorAll('details')) field.open = false;
   extras.hidden = submit.disabled = !form.elements.mood.value;
   document.querySelector('#dialog-title').textContent = restaurants.get(id).name;
+  const place = restaurants.get(id);
+  document.querySelector('#dialog-meta').textContent = '＄'.repeat(place.price) + ' · ' + place.cuisine + ' · ' + place.district;
   dialog.showModal();
 }
 
@@ -253,9 +274,17 @@ function nextComparison() {
   if (pair) {
     fields.hidden = true;
     comparison.hidden = false;
-    comparison.querySelector('.pair').innerHTML = '<button type="button" data-choice="new">'
-      + escape(draft.entry.name) + '</button><button type="button" data-choice="existing">'
-      + escape(pair.name) + '</button>';
+    document.querySelector('#comparison-mood').innerHTML = moods.map(mood =>
+      '<span class="mini-choice mood-' + mood + (mood === draft.entry.mood ? ' chosen' : '') + '">'
+      + '<span class="mood-circle" aria-hidden="true">' + (mood === draft.entry.mood ? '✓' : '') + '</span>'
+      + '<small>' + labels[mood] + (mood === draft.entry.mood ? '（已選）' : '') + '</small></span>').join('');
+    comparison.querySelector('.pair').innerHTML = '<button type="button" data-choice="new" aria-label="' + escape(draft.entry.name) + '">'
+      + escape(draft.entry.name) + '<small>' + escape(draft.entry.district) + '</small></button><button type="button" data-choice="existing" aria-label="' + escape(pair.name) + '">'
+      + escape(pair.name) + '<small>' + escape(pair.district) + '</small></button>';
+    document.querySelector('#comparison-info').innerHTML = [draft.entry, pair].map(place =>
+      '<p><strong>' + escape(place.name) + '</strong><br>' + escape(place.city) + ' · ' + escape(place.district)
+      + ' · ' + escape(place.cuisine) + ' · ' + '＄'.repeat(place.price) + '</p>').join('');
+    comparison.querySelector('details').open = false;
     document.querySelector('#compare-title').focus();
     return;
   }
@@ -272,7 +301,10 @@ document.addEventListener('input', event => {
   if (event.target.id === 'search') {
     query = event.target.value;
     drawResults();
-  } else if (event.target.name === 'mood') extras.hidden = submit.disabled = false;
+  } else if (event.target.name === 'mood') {
+    extras.hidden = submit.disabled = false;
+    extras.open = true;
+  }
 });
 
 document.addEventListener('change', event => {
