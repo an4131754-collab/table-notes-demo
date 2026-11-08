@@ -1,6 +1,6 @@
 import { restaurants } from './catalog.mjs';
 import { beginRanking, compare, finishRanking, moods, opponent, progress, score } from './ranking.mjs';
-import { mapSearchLinks } from './maps.mjs';
+import { googleExploreEmbedUrl, mapSearchLinks } from './maps.mjs?v=20261108-embed';
 
 const key = 'table-notes-v1';
 const empty = { ranked: [], saved: [], recent: [] };
@@ -179,9 +179,18 @@ function exploration() {
   const matches = place => Object.entries(filters).every(([key, value]) => !value || String(place[key]) === value);
   const unseen = all.filter(place => matches(place) && !state.ranked.some(row => row.id === place.id));
   const suggestions = unseen.filter(place => place.cuisine === favorite);
-  return '<h2 id="view-title">探索</h2><p class="muted">示意地圖 · 三個虛構街區</p>'
+  const demoOpen = document.querySelector('#demo-map')?.open;
+  return '<h2 id="view-title">探索</h2><p class="muted">直接拖曳地圖，探索下一餐。</p>'
+    + '<section class="live-map" aria-labelledby="live-map-title"><header><h3 id="live-map-title">Google Maps · 台中市區</h3>'
+    + '<button type="button" data-map-reset>回到台中</button></header>'
+    + '<iframe id="explore-map" title="Google Maps 台中市區互動地圖" src="' + escape(googleExploreEmbedUrl)
+    + '" width="600" height="440" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></section>'
+    + '<p class="map-help">可在圖內拖曳與縮放。下方搜尋可另開 Google Maps 或 Apple 地圖。</p>'
+    + mapSearchPanel()
+    + '<details id="demo-map" class="demo-map"' + (demoOpen ? ' open' : '') + '><summary>我的示範足跡</summary>'
+    + '<p class="muted">以下是虛構餐廳的示意位置，與上方真實地圖分開顯示。</p>'
     + '<div class="filters">' + filterSelect('district', '街區') + filterSelect('cuisine', '料理')
-    + filterSelect('price', '價位') + '</div>' + mapSearchPanel() + drawMap(state.ranked.filter(matches))
+    + filterSelect('price', '價位') + '</div>' + drawMap(state.ranked.filter(matches)) + '</details>'
     + '<section class="progress-box"><h3>個人化推薦進度</h3>'
     + '<progress aria-label="個人化推薦進度" value="' + completed + '" max="' + target + '"></progress>'
     + '<p><strong>' + completed + ' / ' + target + '</strong></p>'
@@ -382,7 +391,8 @@ document.addEventListener('click', event => {
   const button = event.target.closest('button');
   if (!button) return;
   const data = button.dataset;
-  if (data.close !== undefined) dialog.close();
+  if (data.mapReset !== undefined) document.querySelector('#explore-map').src = googleExploreEmbedUrl;
+  else if (data.close !== undefined) dialog.close();
   else if (data.choice) {
     if (data.choice === 'undo' && !draft.history.length) {
       comparison.hidden = true;

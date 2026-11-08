@@ -271,6 +271,15 @@ input::placeholder,textarea::placeholder { color: #687078; }
 .filters { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
 .filters label { font-size: 11px; color: var(--quiet); }
 .filters select { margin-top: 6px; border-radius: 20px; padding: 10px; font-size: 12px; color: var(--accent); }
+.live-map { margin-top: 18px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: #f4f6f5; }
+.live-map > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 12px; background: #fff; }
+.live-map h3 { margin: 0; font-size: 12px; }
+.live-map button { border: 0; color: var(--accent); font-size: 12px; padding-inline: 8px; }
+.live-map iframe { display: block; width: 100%; height: clamp(280px, 48dvh, 440px); border: 0; }
+.map-help { color: var(--quiet); font-size: 11px; line-height: 1.6; }
+.demo-map { margin-top: 20px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; }
+.demo-map > summary { color: var(--accent); font-weight: 600; }
+.demo-map > .muted { font-size: 12px; }
 .map-search-panel { margin: 20px 0; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: #f8faf9; }
 .map-search-panel h3 { margin: 0 0 8px; font-size: 14px; }
 .map-search-panel p { color: var(--quiet); font-size: 12px; line-height: 1.6; }
