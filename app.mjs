@@ -1,5 +1,6 @@
 import { restaurants } from './catalog.mjs';
 import { beginRanking, compare, finishRanking, moods, opponent, progress, score } from './ranking.mjs';
+import { mapSearchLinks } from './maps.mjs';
 
 const key = 'table-notes-v1';
 const empty = { ranked: [], saved: [], recent: [] };
@@ -29,6 +30,7 @@ let ratingId = null;
 let ratingSession = 0;
 let draft = null;
 let query = '';
+let mapQuery = '台中市 餐廳';
 let state = load();
 
 function load() {
@@ -116,6 +118,7 @@ function detail(place) {
     + '<div class="place-actions"><button type="button" class="primary" data-rate="' + place.id + '">' + (row ? '重新評價' : '加入吃過') + '</button> '
     + '<button type="button" class="bookmark" aria-pressed="' + isSaved + '" data-bookmark="' + place.id + '">' + (isSaved ? '已收藏' : '存為想去') + '</button>'
     + '<button type="button" data-page="explore">街區地圖</button></div>'
+    + mapSearchPanel()
     + '<section class="score-grid" aria-label="我的評價摘要"><div><strong>' + (rank ? '#' + rank : '—') + '</strong>我的排名</div>'
     + '<div><strong>' + (rating || '—') + '</strong>' + (rating ? '我的分數' : '滿 10 家顯示分數') + '</div>'
     + '<div><strong>' + (row ? labels[row.mood] : '未評價') + '</strong>用餐感受</div></section>'
@@ -129,6 +132,18 @@ function detail(place) {
       + '<p>再評一家，就能開始累積自己的口味排行。</p>'
       + '<button type="button" data-next>再評一家</button></section>' : '')
     + '</article>';
+}
+
+function mapSearchPanel() {
+  const links = mapQuery.trim() ? mapSearchLinks(mapQuery) : null;
+  return '<section class="map-search-panel" aria-labelledby="map-search-title"><h3 id="map-search-title">到地圖找真實店家</h3>'
+    + '<p id="map-search-help">示範店家沒有真實地址。輸入店名、地址或城市與料理，開啟地圖查看位置。</p>'
+    + '<label for="map-query">真實店名或地址</label><input id="map-query" type="text" maxlength="200" value="' + escape(mapQuery)
+    + '" placeholder="例如：台中市咖啡、餐廳名稱或地址" aria-describedby="map-search-help">'
+    + '<div class="map-links"><a data-map-provider="google"' + (links ? ' href="' + escape(links.google) + '"' : ' aria-disabled="true"')
+    + ' target="_blank" rel="noopener noreferrer">Google Maps <span aria-hidden="true">↗</span></a>'
+    + '<a data-map-provider="apple"' + (links ? ' href="' + escape(links.apple) + '"' : ' aria-disabled="true"')
+    + ' target="_blank" rel="noopener noreferrer">Apple 地圖 <span aria-hidden="true">↗</span></a></div></section>';
 }
 
 function drawMap(places) {
@@ -166,7 +181,7 @@ function exploration() {
   const suggestions = unseen.filter(place => place.cuisine === favorite);
   return '<h2 id="view-title">探索</h2><p class="muted">示意地圖 · 三個虛構街區</p>'
     + '<div class="filters">' + filterSelect('district', '街區') + filterSelect('cuisine', '料理')
-    + filterSelect('price', '價位') + '</div>' + drawMap(state.ranked.filter(matches))
+    + filterSelect('price', '價位') + '</div>' + mapSearchPanel() + drawMap(state.ranked.filter(matches))
     + '<section class="progress-box"><h3>個人化推薦進度</h3>'
     + '<progress aria-label="個人化推薦進度" value="' + completed + '" max="' + target + '"></progress>'
     + '<p><strong>' + completed + ' / ' + target + '</strong></p>'
@@ -298,7 +313,19 @@ function nextComparison() {
 }
 
 document.addEventListener('input', event => {
-  if (event.target.id === 'search') {
+  if (event.target.id === 'map-query') {
+    mapQuery = event.target.value;
+    const links = mapQuery.trim() ? mapSearchLinks(mapQuery) : null;
+    for (const link of document.querySelectorAll('[data-map-provider]')) {
+      if (links) {
+        link.href = links[link.dataset.mapProvider];
+        link.removeAttribute('aria-disabled');
+      } else {
+        link.removeAttribute('href');
+        link.setAttribute('aria-disabled', 'true');
+      }
+    }
+  } else if (event.target.id === 'search') {
     query = event.target.value;
     drawResults();
   } else if (event.target.name === 'mood') {
